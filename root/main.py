@@ -13,7 +13,9 @@ ftpIP = config.get('configuration','ip')
 ftpUSER = config.get('configuration','username')
 ftpPWD = config.get('configuration','password')
 
-rePATH = '/ethtorrent/downloads/complete/Movie/'              #remote path
+pingR = False
+
+rePATH = '/ethtorrent/downloads/complete/TV_Show/'              #remote path
 lcPATH = '/home/ego/TEST/'                                   #local path
 tmpPATH = lcPATH + '.tmp/'                                   #.tmp path, relative to lcPATH
 dlPATH = lcPATH + 'Downloads/'                               #downloads path, relative to lcPATH
@@ -62,6 +64,23 @@ def delInDIR (path):
         elif os.path.isfile(crtOBJ) == True:           #test if is a file and delete it
             print(crtOBJ)
             os.remove(crtOBJ)
+
+
+
+##Ping an adresse or an URL
+
+def pingTest(url):
+    response = os.system("ping -c 1 " + url)
+    pingin = False
+
+    # and then check the response...
+    if response == 0:
+        pingin = True
+        #print(url, 'is up!')
+    else:
+        pingin = False
+        #print(url, 'is down!')
+    return pingin
 
 
 
