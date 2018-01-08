@@ -1,15 +1,19 @@
 import pysftp
 import os
 import shutil
+import configparser
 
 cnopts = pysftp.CnOpts()
 cnopts.hostkeys = None
 
-ftpIP = ''
-ftpUSER = ''
-ftpPWD = ''
+config = configparser.ConfigParser()
+config.read("/home/local1/TEST/credential")
 
-rePATH = '/ethtorrent/downloads/complete/TEST/'              #remote path
+ftpIP = config.get('configuration','ip')
+ftpUSER = config.get('configuration','username')
+ftpPWD = config.get('configuration','password')
+
+rePATH = '/ethtorrent/downloads/complete/Movie/'              #remote path
 lcPATH = '/home/ego/TEST/'                                   #local path
 tmpPATH = lcPATH + '.tmp/'                                   #.tmp path, relative to lcPATH
 dlPATH = lcPATH + 'Downloads/'                               #downloads path, relative to lcPATH
@@ -41,6 +45,7 @@ def moveFile (name, src, dest):
 
 ##remove all file and directory in a given directory, path = path of the folder,
              # will delete all files and folder in this directory
+
 
 def delInDIR (path):
 
@@ -82,7 +87,6 @@ with pysftp.Connection(ftpIP, username=ftpUSER, password=ftpPWD, cnopts=cnopts) 
 
         syncList = os.listdir(lcPATH + '.sync')       #create the list of the file in .sync (DIR local)
         print(sftpLIST)
-
 
 
 

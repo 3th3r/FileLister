@@ -1,11 +1,15 @@
 import pysftp
 import os
-import io
-
+import configparser
 
 cnopts = pysftp.CnOpts()
 cnopts.hostkeys = None
+config = configparser.ConfigParser()
+config.read("/home/local1/TEST/credential")
 
+ftpIP = config.get('configuration','ip')
+ftpUSER = config.get('configuration','username')
+ftpPWD = config.get('configuration','password')
 
 rePATH="/ethtorrent/downloads/complete/TEST/"              #remote path
 lcPATH="/home/ego/TEST/"                                   #local path
@@ -21,7 +25,7 @@ fileExist=0                                                #initialize the varia
 
 #connect to the server through sftp, using credential !!!!! need to create a credential file, for more security.
 
-with pysftp.Connection('', username='', password='', cnopts=cnopts) as sftp:
+with pysftp.Connection(ftpIP, username=ftpUSER, password=ftpPWD, cnopts=cnopts) as sftp:
     with sftp.cd(rePATH):                             #go to the directory rePATH
         tmp = sftp.listdir('')                        #list the files present in rePATH (DIR remote)
 
@@ -49,12 +53,10 @@ with pysftp.Connection('', username='', password='', cnopts=cnopts) as sftp:
          #test if is a file them copy with a .tmp, and rename it
          elif sftp.isfile(tmp[i]) == True:
              sftp.get(tmp[i], lcPATH + tmp[i] + ".tmp", preserve_mtime=True)
-             #os.renames(lcPATH + tmp[i] + ".tmp", lcPATH + tmp[i])
+             os.renames(lcPATH + tmp[i] + ".tmp", lcPATH + tmp[i])
              print(tmp[i] + " : copied")
-             #os.mknod(lcPATH + tmp[i] + ".dummy") ### !!!!!!!!!!!! WARNING For test only
              os.mknod(lcPATH + ".sync/" + tmp[i] + ".sync")
          elif sftp.isdir(tmp[i]) == True:
-             sftp.get_r(tmp[i], tmpPATH, preserve_mtime=True)
-             os.
+             sftp.get_r(tmp[i], lcPATH, preserve_mtime=True)
              os.mknod(lcPATH + ".sync/" + tmp[i] + ".sync")
              print(tmp[i]+" : folder copied")
