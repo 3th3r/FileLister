@@ -1,6 +1,8 @@
 import pysftp
 import time
 import configparser
+import re
+import datetime
 
 
 cnopts = pysftp.CnOpts()
@@ -21,24 +23,24 @@ with pysftp.Connection(ftpIP, username=ftpUSER, password=ftpPWD, cnopts=cnopts) 
         sftpLIST = sftp.listdir('')
 
         now = time.time()
-        #age = now - os.path.getctime('')
-        #hr = 3600
 
-        #print(sftp.listdir_attr('LBC'))
         tutu=sftp.listdir_attr('')
         toto=str(tutu)
         toto = toto.split(',')
+        tata = re.findall(r'mtime=\w+',str(toto[0]))
+        titi = re.findall( r'\d+', str(tata[0]) )
 
-        #print(tutu)
-        #print(type(tutu))
-        print(tutu[0])
+        rtime = int(titi[0])
+        dif = now - rtime
+
+        modTime = datetime.datetime.fromtimestamp(rtime)
+
+
+
+
         print(toto[0])
-
-
-
-        #for toto in tutu:
-        #    print(toto)
-
-        #for attr in sftp.listdir_attr():
-        #    print(attr)
-        #    #print(attr.size)
+        print(tutu[0])
+        print(tata)
+        print(rtime)
+        print(now)
+        print(modTime)
