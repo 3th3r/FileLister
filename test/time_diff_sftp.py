@@ -27,20 +27,26 @@ with pysftp.Connection(ftpIP, username=ftpUSER, password=ftpPWD, cnopts=cnopts) 
         tutu=sftp.listdir_attr('')
         toto=str(tutu)
         toto = toto.split(',')
-        tata = re.findall(r'mtime=\w+',str(toto[0]))
+        tata = re.findall(r'mtime=\w+',str(toto[1]))
         titi = re.findall( r'\d+', str(tata[0]) )
 
         rtime = int(titi[0])
-        dif = now - rtime
+        #dif = now - rtime
 
         modTime = datetime.datetime.fromtimestamp(rtime)
+        modTime2 = datetime.datetime.fromtimestamp(now)
+        delta = datetime.timedelta(seconds=(now-rtime))
+        #deltaSec = datetime.timedelta.seconds(delta)
+        #datetime.timedelta.seconds
 
 
-
-
-        print(toto[0])
-        print(tutu[0])
-        print(tata)
+        #print(toto[0])
+        #print(tutu[0])
+        #print(tata)
         print(rtime)
         print(now)
         print(modTime)
+        print(modTime2)
+        print(delta)
+        print(type(delta))
+        print(delta.total_seconds())

@@ -3,6 +3,8 @@ import os
 import shutil
 import configparser
 import time
+import datetime
+import re
 
 cnopts = pysftp.CnOpts()
 cnopts.hostkeys = None
@@ -23,12 +25,15 @@ syncPATH = lcPATH + '.sync/'
 dlPATH = lcPATH + 'Downloads/'                               #downloads path, relative to lcPATH
 dirList = os.listdir(lcPATH)                                 #list of all the file in lcPATH
 
+maxAge = 7                                                   #define the maximun of a file to be downloaded, older than
+                                                                        # "maxAge" (in days) won't be downlaoded
+
 syncList = ''                                                #initialise the sync varialbe, needed to compare if a file
                                                                         # .... have been already downladed
-fileExist = 0                                                #initialize the varialbe needed to compare the sync list and
+fileExist = False                                            #initialize the varialbe needed to compare the sync list and
                                                                         # .... the file in rePATH dir
-
-
+toOld = False                                                #initialize the needed to compare if older than maxAge
+now = time.time()
 
 #################################################################################
 
@@ -83,17 +88,6 @@ def pingTest(url):
 
 
 
-##Age of of file from now
-
-def fileAge(file):
-
-    now = time.time()
-    age = now - os.path.getctime(file)
-    hr = 3600
-
-    return float(age / hr)
-
-
 
 
 ##################################
@@ -102,7 +96,15 @@ def fileAge(file):
 with pysftp.Connection(ftpIP, username=ftpUSER, password=ftpPWD, cnopts=cnopts) as sftp:
     with sftp.cd(rePATH):                             #go to the directory rePATH
         sftpLIST = sftp.listdir('')                        #list the files present in rePATH (DIR remote)
-    
+
+        ##Time difference between server and now
+
+        sftATTRlist = sftp.listdir_attr('')
+        maxAgeSec = maxAge*86400                         #convert days in second, easier to handle time compare
+
+        tmpATTR = str(sftATTRlist)
+        tmpATTR = tmpATTR.split(',')
+
     ##Initialize the sync folder and object list
         #try if the .sync path / directory exist, otherwise create it
         try:
@@ -120,16 +122,30 @@ with pysftp.Connection(ftpIP, username=ftpUSER, password=ftpPWD, cnopts=cnopts) 
 
         # test if the file is present in local or as already been downloaded
         for i in range(len(sftpLIST)):
-            fileExist = 0
+            fileExist = False
+            toOld = False
 
             if sftpLIST[i] in dirList:  # test if exist localy
-                fileExist = 1
+                fileExist = True
             elif (sftpLIST[i] + ".sync") in syncList:
-                fileExist = 1  # test if already downloaded
+                fileExist = True  # test if already downloaded
 
-            if fileExist == 1 :
-                print(sftpLIST[i] + " : exist")  # if already downloaded or exist print "exist"
+            rtimeTmp = re.findall(r'mtime=\w+',str(tmpATTR[i]) )
+            rtime = re.findall( r'\d+', str(rtimeTmp[0]) )
+            deltaTime = datetime.timedelta(seconds=now - int(rtime[0]))
 
+
+
+            if deltaTime.total_seconds() > maxAgeSec:
+                toOld = True
+
+
+            if fileExist == True:
+                print(sftpLIST[i] + " : exist")                          # if already downloaded or exist print "exist"
+
+            # test is file or dir is than maxAge
+            elif toOld == True:
+                print(sftpLIST[i] + ' : older than ' + str(maxAge) + ' days')
             # test if is a file them copy with a .tmp, and rename it
             elif sftp.isfile(sftpLIST[i]) == True:
 
@@ -139,7 +155,7 @@ with pysftp.Connection(ftpIP, username=ftpUSER, password=ftpPWD, cnopts=cnopts) 
 
                 print(sftpLIST[i] + " : copied")
                 os.mknod(syncPATH + sftpLIST[i] + ".sync")
-
+            # test if is a dir them copy with a .tmp, and rename it
             elif sftp.isdir(sftpLIST[i]) == True:
 
                 sftp.get_r(sftpLIST[i], tmpPATH, preserve_mtime=True)
