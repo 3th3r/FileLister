@@ -1,18 +1,9 @@
-import pysftp
-import configparser
+import os
+import shutil
 
-cnopts = pysftp.CnOpts()
-cnopts.hostkeys = None
-config = configparser.ConfigParser()
-config.read("/home/local1/TEST/credential")
+path1 = r'E:\Telecharger\MobaXterm_Portable_v10.4\CygUtils.plugin'
+path2 = r'E:\test'
 
-ftpIP = config.get('configuration','ip')
-ftpUSER = config.get('configuration','username')
-ftpPWD = config.get('configuration','password')
-
-rePATH = '/ethtorrent/downloads/complete/TEST/'
-
-with pysftp.Connection(ftpIP, username=ftpUSER, password=ftpPWD, cnopts=cnopts) as sftp:
-    with sftp.cd(rePATH):                             #go to the directory rePATH
-        sftpLIST = sftp.listdir('')
-        print(sftpLIST)
+shutil.copy(path1,path2)
+print(path1)
+print(path2)
