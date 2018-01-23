@@ -12,13 +12,12 @@ ftpIP = cred.get('credential','ip')
 ftpUSER = cred.get('credential','username')
 ftpPWD = cred.get('credential','password')
 
-rePATH = '/ethtorrent/downloads/complete/'
+rePATH = '/ethtorrent/downloads/complete/TEST'
 
 wtcb = pysftp.WTCallbacks()
 
 with pysftp.Connection(ftpIP, username=ftpUSER, password=ftpPWD, cnopts=cnopts) as sftp:
-    sftp.walktree( rePATH, fcallback=wtcb.dir_cb, dcallback=wtcb.dir_cb, ucallback=wtcb.unk_cb )
-    print(len(wtcb.flist))
-    for fpath in wtcb.flist:
-        print(fpath)
-sftp.close()
+    sftp.walktree(rePATH, wtcb.file_cb, wtcb.dir_cb, wtcb.unk_cb, recurse=True)
+
+    for entry in sftp.listdir(rePATH)
+        pathname = pos
